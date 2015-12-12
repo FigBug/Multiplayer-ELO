@@ -3,7 +3,7 @@ Multiplayer ELO calculations
 
 Based on the algorithm / code presented here: http://elo-norsak.rhcloud.com/index.php
 
-Simple way to calculate ELO for multiplayer games. Currently PHP and C++, eventually in several languages.
+Simple way to calculate ELO for multiplayer games. Currently C#, C++, Java and PHP versions. Slowly doing more.
 
 Usage:
 
