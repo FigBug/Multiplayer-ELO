@@ -42,6 +42,16 @@ public:
         return 1500;
     }
 
+    int getELOChange(std::string name)
+    {
+        for (ELOPlayer& p : players)
+        {
+            if (p.name == name)
+                return p.eloChange;
+        }
+        return 0;
+    }
+
     void calculateELOs()
     {
         int n = int(players.size());
