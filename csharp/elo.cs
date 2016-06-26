@@ -50,7 +50,7 @@ namespace ELO
     
         public void calculateELOs()
         {
-            int n = players.Count();
+            int n = players.Count;
             float K = 32 / (float)(n - 1);
             
             for (int i = 0; i < n; i++)
