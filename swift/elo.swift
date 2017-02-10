@@ -54,12 +54,12 @@ class ELOMatch
         let n = players.count;
         let K = 32 / Double(n - 1);
         
-        for (var i = 0; i < n; i++)
+        for i in 0 ..< n
         {
             let curPlace = players[i].place;
             let curELO   = players[i].eloPre;
             
-            for (var j = 0; j < n; j++)
+            for j in 0 ..< n
             {
                 if i != j
                 {
