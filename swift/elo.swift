@@ -1,96 +1,105 @@
-import Foundation
+import Darwin
 
-class ELOPlayer
-{
-    var name: String = "";
-    
-    var place: Int = 0;
-    var eloPre: Int = 0;
-    var eloPost: Int = 0;
-    var eloChange: Int = 0;
+/** Holds a player name and Elo rating. */
+struct ELOPlayer: Hashable{
+  let name: String
+  var elo : Int
 }
 
-class ELOMatch
-{
-    var players = [ELOPlayer]();
-    
-    func addPlayer(name: String, place: Int, elo: Int)
-    {
-        let player = ELOPlayer();
-        
-        player.name    = name;
-        player.place   = place;
-        player.eloPre  = elo;
-        
-        players.append(player);
+/** Holds a player and information related to the match. */
+class EloPlayerResult {
+  let player: ELOPlayer
+  let placement: Int
+
+  /** The accumulated change in Elo rating over the match. */
+  internal(set) var eloChange: Int
+
+  /** Elo rating before the match. */
+  var eloPre : Int { return player.elo }
+
+  /** Elo rating after the match. */
+  var eloPost: Int { return player.elo + eloChange }
+
+  init(player: ELOPlayer, placement: Int) {
+    self.player    = player
+    self.placement = placement
+    self.eloChange = 0
+  }
+}
+
+extension EloPlayerResult: Hashable {
+  var hashValue: Int {
+    return self.player.name.hashValue
+  }
+
+  static func == (lhs: EloPlayerResult, rhs: EloPlayerResult) -> Bool {
+    return lhs.player.name == rhs.player.name
+  }
+}
+
+/** Holds the players and their match results. */
+class ELOMatch {
+  /** All the player results in the match. */
+  private(set) var players: Set<EloPlayerResult>
+
+  init(_ results: Set<EloPlayerResult>) {
+    self.players = results
+    calculateELOs()
+  }
+
+  /** Calculate a pairing, apply results to both. */
+  private func applyMatchResults(first: EloPlayerResult,
+                                 second: EloPlayerResult,
+                                 kFactor: Double) {
+    guard first != second else { return }
+
+    let qFirst = pow(10.0, Double(first.player.elo) / 400.0)
+    let qSecond = pow(10.0, Double(second.player.elo) / 400.0)
+    let qDemoninator = qFirst + qSecond
+
+    // Expected scores.
+    let expectedFirst = qFirst / qDemoninator
+    let expectedSecond = qSecond / qDemoninator
+
+    // Actual score for first player, second is (1 - scoreFirst).
+    var scoreFirst: Double
+
+    switch     first.placement {
+    case       second.placement: scoreFirst = 1.0 // tie
+    case    ..<second.placement: scoreFirst = 0.5 // first won
+    default                    : scoreFirst = 0.0 // first lost
     }
-    
-    func getELO(name : String) -> Int
-    {
-        for (p) in players
-        {
-            if p.name == name
-            {
-                return p.eloPost;
-            }
-        }
-        return 1500;
+
+    first.eloChange  += Int(round(kFactor * (scoreFirst - expectedFirst)))
+    second.eloChange += Int(round(kFactor * (1.0 - scoreFirst - expectedSecond)))
+  }
+
+  /** Calculate the match results. */
+  private func calculateELOs() {
+    let kFactor = 32 / Double(players.count - 1)
+
+    // Pair the opponents.
+
+    for playerIndex in players.indices where playerIndex != players.endIndex {
+      let remainder = players.index(after: playerIndex)
+      // Skip pairings that have already been done, calculate the rest.
+      for second in players[remainder...] {
+        applyMatchResults(first: players[playerIndex], second: second, kFactor: kFactor)
+      }
     }
-    
-    func getELOChange(name : String) -> Int
-    {
-        for (p) in players
-        {
-            if p.name == name
-            {
-                return p.eloChange;
-            }
-        }
-        return 0;
-    }
-    
-    func calculateELOs()
-    {
-        let n = players.count;
-        let K = 32 / Double(n - 1);
-        
-        for i in 0 ..< n
-        {
-            let curPlace = players[i].place;
-            let curELO   = players[i].eloPre;
-            
-            for j in 0 ..< n
-            {
-                if i != j
-                {
-                    let opponentPlace = players[j].place;
-                    let opponentELO   = players[j].eloPre;
-                    
-                    //work out S
-                    var S : Double;
-                    if curPlace < opponentPlace
-                    {
-                        S = 1;
-                    }
-                    else if curPlace == opponentPlace
-                    {
-                        S = 0.5;
-                    }
-                    else
-                    {
-                        S = 0;
-                    }
-                    
-                    //work out EA
-                    let EA = 1 / (1.0 + pow(10.0, Double(opponentELO - curELO) / 400.0));
-                    
-                    //calculate ELO change vs this one opponent, add it to our change bucket
-                    //I currently round at this point, this keeps rounding changes symetrical between EA and EB, but changes K more than it should
-                    players[i].eloChange += Int(round(K * (S - EA)));
-                }
-            }
-            //add accumulated change to initial ELO for final ELO
-            players[i].eloPost = players[i].eloPre + players[i].eloChange;
-        }
-    }
-};
+  }
+}
+
+// Usage:
+//
+//  let results: Set<EloPlayerResult> = [
+//    EloPlayerResult(player: ELOPlayer(name: "Joe", elo: 1600), placement: 1),
+//    EloPlayerResult(player: ELOPlayer(name: "Sam", elo: 1550), placement: 2),
+//    EloPlayerResult(player: ELOPlayer(name: "Ted", elo: 1520), placement: 3),
+//    EloPlayerResult(player: ELOPlayer(name: "Rex", elo: 1439), placement: 4)]
+//
+//  let match = ELOMatch(results)
+//
+//  match.players.forEach { (playerResult) in
+//    print("\(playerResult.player.name): \(playerResult.eloPost)")
+//  }
