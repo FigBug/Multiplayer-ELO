@@ -65,8 +65,8 @@ class ELOMatch {
     var scoreFirst: Double
 
     switch     first.placement {
-    case       second.placement: scoreFirst = 1.0 // tie
-    case    ..<second.placement: scoreFirst = 0.5 // first won
+    case       second.placement: scoreFirst = 0.5 // tie
+    case    ..<second.placement: scoreFirst = 1.0 // first won
     default                    : scoreFirst = 0.0 // first lost
     }
 
@@ -93,10 +93,10 @@ class ELOMatch {
 // Usage:
 //
 //  let results: Set<EloPlayerResult> = [
-//    EloPlayerResult(player: ELOPlayer(name: "Joe", elo: 1600), placement: 1),
-//    EloPlayerResult(player: ELOPlayer(name: "Sam", elo: 1550), placement: 2),
-//    EloPlayerResult(player: ELOPlayer(name: "Ted", elo: 1520), placement: 3),
-//    EloPlayerResult(player: ELOPlayer(name: "Rex", elo: 1439), placement: 4)]
+//    EloPlayerResult(player: ELOPlayer(name: "Joe", elo: 1612), placement: 1),
+//    EloPlayerResult(player: ELOPlayer(name: "Sam", elo: 1554), placement: 2),
+//    EloPlayerResult(player: ELOPlayer(name: "Ted", elo: 1515), placement: 3),
+//    EloPlayerResult(player: ELOPlayer(name: "Rex", elo: 1428), placement: 4)]
 //
 //  let match = ELOMatch(results)
 //
