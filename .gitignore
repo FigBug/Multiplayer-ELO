@@ -1,0 +1,6 @@
+delphi/__history/
+delphi/test/__history/
+delphi/test/Delphi_ELO_Test.dproj.local
+*.dcu
+delphi/uELO.pas.cbk
+delphi/__recovery/

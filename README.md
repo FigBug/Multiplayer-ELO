@@ -3,8 +3,6 @@ Multiplayer ELO calculations
 
 Based on the algorithm / code presented here: http://elo-norsak.rhcloud.com/index.php
 
-Simple way to calculate ELO for multiplayer games. Currently C, C#, C++, Java, Objective-C, Python, PHP and Swift versions. Slowly doing more.
-Upcoming: JavaScript
 
 Usage:
 
