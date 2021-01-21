@@ -10,7 +10,8 @@ class ELOPlayer:
     eloChange = 0
     
 class ELOMatch:
-    players = []
+     def __init__(self):
+        self.players = []
     
     def addPlayer(self, name, place, elo):
         player = ELOPlayer()
